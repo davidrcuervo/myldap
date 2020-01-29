@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.laetienda</groupId>
+  <artifactId>myldap</artifactId>
+  <version>0.1.2-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>My JavaEE App Server :: MyLdap</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.la-etienda.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>11</maven.compiler.release>
+    <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>2.13.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-core</artifactId>
+    	<version>2.13.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.directory.server</groupId>
+    	<artifactId>apacheds-all</artifactId>
+    	<version>2.0.0-M24</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.laetienda</groupId>
+    	<artifactId>myapptools</artifactId>
+    	<version>0.1.2-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>MyLdap</finalName>
+    <plugins>
+    	<plugin>
+    		<groupId>org.apache.maven.plugins</groupId>
+          	<artifactId>maven-compiler-plugin</artifactId>
+          	<version>3.8.1</version>
+          	<configuration>
+          		<release>11</release>
+          		<compilerArguments>
+          			<endorseddirs>${endorsed.dir}</endorseddirs>
+          		</compilerArguments>
+          	</configuration>
+    	</plugin>
+    	<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+        	<artifactId>maven-war-plugin</artifactId>
+        	<version>3.2.3</version>
+        	<configuration>
+        		<failOnMissingWebXml>false</failOnMissingWebXml>
+        	</configuration>
+  		</plugin>
+    </plugins>
+  </build>
+</project>

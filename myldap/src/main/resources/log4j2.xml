@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Properties>
+		<Property name="mypattern">%d [%p] %c %M:%L \t %m%n</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console">
+			<PatternLayout pattern="${mypattern}"></PatternLayout>
+			<ThresholdFilter level="DEBUG"></ThresholdFilter>
+		</Console>
+		<!-- 
+		<File name="errorFile" fileName="${sys:logFilePath}/web.error.log">
+			<PatternLayout pattern="${mypattern}"></PatternLayout>
+			<ThresholdFilter level="ERROR"></ThresholdFilter>
+		</File>
+		<File name="debugFile" fileName="${sys:logFilePath}/web.debug.log">
+			<PatternLayout pattern="${mypattern}"></PatternLayout>
+			<ThresholdFilter level="DEBUG"></ThresholdFilter>
+		</File>
+		-->
+		
+	</Appenders>
+	<Loggers>
+		<Logger name="com.laetienda" level="debug" additivity="false">
+		<!-- <AppenderRef ref="errorFile"></AppenderRef> -->
+      	<AppenderRef ref="Console"></AppenderRef>
+	</Logger>
+    <!--
+    <Logger name="com.laetienda" level="debug" additivity="false">
+      <AppenderRef ref="Console"></AppenderRef>
+    </Logger>
+    -->
+		<Root level="off" additivity="false">
+			<AppenderRef ref="Console"></AppenderRef>
+		</Root>
+	</Loggers>
+</Configuration>
