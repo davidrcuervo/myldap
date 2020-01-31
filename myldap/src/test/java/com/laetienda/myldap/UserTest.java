@@ -6,18 +6,18 @@ import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Test {
-	private static final Logger log = LogManager.getLogger(Test.class);
+public class UserTest {
+	private static final Logger log = LogManager.getLogger(UserTest.class);
 	
 	private Ldap ldap;
 	
-	public Test() {
+	public UserTest() {
 		ldap = new Ldap();
 	}
 	
 	public void search(String entry, LdapConnection conn) throws Exception {
 		log.info("Searching in ldap. $dn: {}", entry);
-		Entry result = ldap.searchDn(entry, conn);
+		Entry result = conn.lookup(entry);
 		
 		if(result == null) {
 			log.warn("It didn't find any entry");
@@ -37,7 +37,7 @@ public class Test {
 			user.setSn("snlesses");
 			user.setEmail("user.test@mail.com", conn);
 			user.setPassword("Welcome1", "Welcome1");
-			ldap.insertUser(user, conn);
+			ldap.insertLdapEntity(user, conn);
 			log.info("...User added succesfully");
 		} catch (Exception e) {
 			log.error("Failed to add user. $error: ", e.getMessage());
@@ -66,7 +66,7 @@ public class Test {
 		
 		try {
 			User user = ldap.findUser("uid=testUser, ou=people, dc=example, dc=com", conn);
-			ldap.removeUser(user, conn);
+			ldap.ldapEntity(user, conn);
 			log.info("...User removed succesfully.");
 		} catch (Exception e) {
 			log.warn("Failed to remove user.");
@@ -77,7 +77,7 @@ public class Test {
 	public static void main(String args[]) {
 		log.info("Testing LDAP module...");
 		
-		Test test = new Test();
+		UserTest test = new UserTest();
 		LdapManager manager = new LdapManager();
 		
 		LdapConnection conn = null;

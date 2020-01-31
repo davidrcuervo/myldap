@@ -1,16 +1,16 @@
 package com.laetienda.myldap;
 
-import java.io.IOException;
+//import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.directory.api.ldap.model.cursor.CursorException;
-import org.apache.directory.api.ldap.model.cursor.EntryCursor;
+//import org.apache.directory.api.ldap.model.cursor.CursorException;
+//import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Modification;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.message.SearchScope;
+//import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.logging.log4j.LogManager;
@@ -37,75 +37,89 @@ public class Ldap {
 		return result;
 	}
 	
-	public Entry searchDn(String dnstr, LdapConnection conn) throws Exception{
-		
-		Entry result = null;
-		
-		try {
-			Dn dn = new Dn(dnstr);
-			result = searchDn(dn,conn);
-			
-		} catch (Exception e) {
-			throw e;
-		}
-		
-		return result;
-	}
-	
-	public Entry searchDn(Dn dn, LdapConnection conn) throws Exception {
-		log.info("Searching for dn entry in LDAP. $dn: {} ...", dn.getName());
-		Entry result = null;
-		EntryCursor cursor = null;;
-		try {
-			cursor = conn.search(dn, "(objectclass=*)",  SearchScope.OBJECT);
-			
-			if(cursor.next()) {
-				result = cursor.get();
-			}
-			
-			if(cursor.iterator().hasNext()) {
-				result = null;
-				log.warn("dn: %s exists more than once", dn);
-			}
-			
-			log.info("... sarch for dn has finished");
-		} catch (LdapException  | CursorException e) {
-			log.warn("Failed to search dn entry.");
-			throw e;
-		} finally {
-			closeCursor(cursor);
-		}
-		
-		return result;
-	}
+	/**
+	 * @deprecated Better to use LdapConnection.lookup()
+	 * @param dnstr
+	 * @param conn
+	 * @return
+	 * @throws Exception
+	 */
+//	public Entry searchDn(String dnstr, LdapConnection conn) throws Exception{
+//		
+//		Entry result = null;
+//		
+//		try {
+//			Dn dn = new Dn(dnstr);
+//			result = searchDn(dn,conn);
+//			
+//		} catch (Exception e) {
+//			throw e;
+//		}
+//		
+//		return result;
+//	}
 	
 	/**
-	 * @param user
+	 * @deprecated Better use LdapConnection.lookup(Dn)
+	 * @param dn
+	 * @param conn
+	 * @return
+	 * @throws Exception
+	 */
+//	public Entry searchDn(Dn dn, LdapConnection conn) throws Exception {
+//		log.info("Searching for dn entry in LDAP. $dn: {} ...", dn.getName());
+//		Entry result = null;
+//		EntryCursor cursor = null;;
+//		try {
+//			cursor = conn.search(dn, "(objectclass=*)",  SearchScope.OBJECT);
+//			
+//			if(cursor.next()) {
+//				result = cursor.get();
+//			}
+//			
+//			if(cursor.iterator().hasNext()) {
+//				result = null;
+//				log.warn("dn: %s exists more than once", dn);
+//			}
+//			
+//			log.info("... sarch for dn has finished");
+//		} catch (LdapException  | CursorException e) {
+//			log.warn("Failed to search dn entry.");
+//			throw e;
+//		} finally {
+//			closeCursor(cursor);
+//		}
+//		
+//		return result;
+//	}
+	
+	/**
+	 * @param ldapEntity
 	 * @param conn
 	 * @throws LdapException
 	 */
-	public void insertUser(User user, LdapConnection conn) throws LdapException {
-		log.info("Inserting user into ldap...");
+	public void insertLdapEntity(LdapEntity ldapEntity, LdapConnection conn) throws LdapException {
+		log.info("Inserting LdapEntity into ldap...");
 		
 		try {
-			log.debug("User Dn. $dn: {}", user.getLdapEntry().getDn().getName());
+			log.debug("LdapEntity Dn. $dn: {}", ldapEntity.getLdapEntry().getDn().getName());
 			
 			if(log.isDebugEnabled()) {
-				Iterator<Attribute> iterator = user.getLdapEntry().getAttributes().iterator();
+				Iterator<Attribute> iterator = ldapEntity.getLdapEntry().getAttributes().iterator();
 				while(iterator.hasNext()) {
 					Attribute atr = iterator.next();
 					log.debug("$Attribute: {} -> $Value: {}", atr.getId(), atr.get());
 				}
 			}
 			
-			if(user.getErrors().size() > 0 ) {
-				log.warn("User was not added. User input not valid");
+			if(ldapEntity.getErrors().size() > 0 ) {
+				log.warn("LdapEntity was not added. User input not valid");
 			}else {
-				conn.add(user.getLdapEntry());
-				log.info("... user has been inserted into ldap succesfully");
+				conn.add(ldapEntity.getLdapEntry());
+				log.info("... LdapEntity has been inserted into ldap succesfully");
 			}
 		} catch (LdapException e) {
-			log.error("Failed to insert user into ldap");
+			log.error("Failed to insert LdapEntity into ldap");
 			throw e;
 		}
 	}
@@ -132,7 +146,7 @@ public class Ldap {
 	public User findUser(Dn dn, LdapConnection conn) throws Exception{
 		User result = null;
 		try {
-			Entry entry = searchDn(dn, conn);
+			Entry entry = conn.lookup(dn);
 			result = new User(entry);
 		} catch (Exception e) {
 			log.warn("Failed to find user");
@@ -144,34 +158,46 @@ public class Ldap {
 	
 	/**
 	 * 
-	 * @param user
+	 * @param ldapEnity
 	 * @param conn
 	 * @throws LdapException
 	 */
-	public void modify(User user, LdapConnection conn) throws LdapException {
-		log.info("Modifying user in ldap...");
+	public void modify(LdapEntity ldapEnity, LdapConnection conn) throws LdapException {
+		log.info("Modifying LdapEntity in ldap...");
 		try {
 			
-			if(user.getErrors().size() > 0) {
-				log.warn("Failed to modify user due to invalid user input");
-			}else {			
-				for(Modification modification : user.getModifications()) {
-					conn.modify(user.getLdapEntry().getDn(), modification);
+			if(ldapEnity.getErrors().size() > 0) {
+				log.warn("Failed to modify LdapEntity due to invalid user input");
+			}else {
+				
+//				Iterator<Modification> iter = ldapEnity.getModifications().iterator();
+//				
+//				while(iter.hasNext()) {
+//					Modification temp = iter.next();
+//					conn.modify(ldapEnity.getLdapEntry().getDn(), temp);
+//					ldapEnity.getModifications().remove(temp);
+//				}
+				
+				for(Modification modification : ldapEnity.getModifications()) {
+					conn.modify(ldapEnity.getLdapEntry().getDn(), modification);
 				}
-				log.info("... user has been modifying succesfully");
+				
+				ldapEnity.clearModifications();
+				
+				log.info("... LdapEntity has been modifying succesfully");
 			}
 		} catch (LdapException e) {
-			log.error("Failed to modify user in ldap");
+			log.error("Failed to modify LdapEntity in ldap");
 			throw e;
 		}
 	}
 	
-	public void removeUser(User user, LdapConnection conn) throws LdapException {
-		log.info("removing user from ldap...");
+	public void ldapEntity(LdapEntity ldapEntity, LdapConnection conn) throws LdapException {
+		log.info("removing LdapEntity from ldap...");
 		
 		try {
-			conn.delete(user.getLdapEntry().getDn());
-			log.info("...User removed form LDAP succesfully");
+			conn.delete(ldapEntity.getLdapEntry().getDn());
+			log.info("...LdapEntity removed form LDAP succesfully");
 		} catch (LdapException e) {
 			log.info("failed to remove user from LDAP");
 			throw e;
@@ -184,7 +210,7 @@ public class Ldap {
 		
 		try {
 			Dn peopleDn = new Dn("ou=People", LdapManager.getDomainDn().getName());
-			result=searchDn(peopleDn, conn);
+			result=conn.lookup(peopleDn);
 			log.info("... people Dn has been found. $peopleDn: {}", result.getDn().getName());
 		} catch (Exception e) {
 			log.warn("failed to get people ldap entry");
@@ -194,15 +220,15 @@ public class Ldap {
 		return result;
 	}
 	
-	private void closeCursor(EntryCursor cursor) {
-		log.info("Closing ldap search cursor");
-		try {
-			if(cursor != null && !cursor.isClosed()) {
-				cursor.close();
-			}
-			log.info("... ldap search cursor has closed succesfully");
-		}catch(IOException e) {
-			log.warn("Failed to close ldap search cursor.", e);
-		}
-	}
+//	private void closeCursor(EntryCursor cursor) {
+//		log.info("Closing ldap search cursor");
+//		try {
+//			if(cursor != null && !cursor.isClosed()) {
+//				cursor.close();
+//			}
+//			log.info("... ldap search cursor has closed succesfully");
+//		}catch(IOException e) {
+//			log.warn("Failed to close ldap search cursor.", e);
+//		}
+//	}
 }

@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 
-public class User implements Serializable, FormBeanInterface{
+public class User implements Serializable, FormBeanInterface, LdapEntity{
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LogManager.getLogger(User.class);
 
@@ -43,6 +43,20 @@ public class User implements Serializable, FormBeanInterface{
 	public User() {
 		ldap = new Ldap();
 		tools = new MyAppTools();
+	}
+	
+	public User(String username, LdapConnection conn) throws LdapException {
+		ldap = new Ldap();
+		tools = new MyAppTools();
+		
+		try {
+			Dn dn = new Dn("uid=" + username, "ou=people", LdapManager.getDomainDn().getName());
+			ldapEntry = conn.lookup(dn);
+			this.uid = username;
+		} catch (LdapException e) {
+			log.error("Invalid attribute (harcoded). $attribute: uid & $error: {}", e.getMessage());
+			throw e;
+		}
 	}
 	
 	public User(Entry entry) throws LdapInvalidAttributeValueException {
@@ -85,7 +99,7 @@ public class User implements Serializable, FormBeanInterface{
 		log.info("Setting user LDAP entry ...");		
 		try {
 			Dn dn = new Dn("uid=" + uid, "ou=People", LdapManager.getDomainDn().getName());
-			ldapEntry = ldap.searchDn(dn, conn);
+			ldapEntry = conn.lookup(dn);
 			
 			if(ldapEntry == null) {				
 				ldapEntry = new DefaultEntry(dn);
@@ -123,7 +137,7 @@ public class User implements Serializable, FormBeanInterface{
 					addError("uid", "Username can't have more than 64 characters");
 				}
 				
-				if(ldap.searchDn("uid=" + username + ", ou=people, " + LdapManager.getDomainDn().getName(), conn) != null) {
+				if(conn.lookup("uid=" + username + ", ou=people, " + LdapManager.getDomainDn().getName()) != null) {
 					addError("uid", "Username already exists");
 				}else {
 								
@@ -357,7 +371,13 @@ public class User implements Serializable, FormBeanInterface{
 		return ldapEntry;
 	}
 	
+	@Override
 	public List<Modification> getModifications(){
 		return modifications;
+	}
+	
+	@Override
+	public void clearModifications() {
+		modifications = new ArrayList<Modification>();
 	}
 }
